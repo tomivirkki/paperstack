@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Implementation-Title: paperstack
+Implementation-Version: 0.9.0
+Vaadin-Package-Version: 1
+Class-Path: 
+Vaadin-Widgetsets: org.vaadin.virkki.paperstack.PaperstackWidgetset
+
