@@ -28,9 +28,11 @@ import com.vaadin.ui.Component;
  * 
  */
 @SuppressWarnings("serial")
-public class PaperStack extends AbstractComponentContainer implements PaperStackServerRpc {
+public class PaperStack extends AbstractComponentContainer implements
+        PaperStackServerRpc {
     public static final String DEFAULT_BACKGROUND_COLOR = "#fff";
-    public static final Pattern HEX_PATTERN = Pattern.compile("^#([A-Fa-f0-9]{6})$");
+    public static final Pattern HEX_PATTERN = Pattern
+            .compile("^#([A-Fa-f0-9]{6})$");
 
     private final List<Component> components = new ArrayList<Component>();
     private final Map<Component, String> backgroundColors = new HashMap<Component, String>();
@@ -42,15 +44,17 @@ public class PaperStack extends AbstractComponentContainer implements PaperStack
     }
 
     @Override
-    public PaperStackState getState() {
+    protected PaperStackState getState() {
         return (PaperStackState) super.getState();
     }
 
     @Override
     public void pageChanged(final boolean forwards) {
-        final int currentComponentIndex = components.indexOf(getState().getCurrentComponent());
-        final Component newCurrent = components.get(currentComponentIndex + (forwards ? 1 : -1));
-        getState().setCurrentComponent(newCurrent);
+        final int currentComponentIndex = components
+                .indexOf(getState().currentComponent);
+        final Component newCurrent = components.get(currentComponentIndex
+                + (forwards ? 1 : -1));
+        getState().currentComponent = newCurrent;
         updateStateInternal();
 
         fireEvent(new PageChangeEvent(this));
@@ -62,18 +66,19 @@ public class PaperStack extends AbstractComponentContainer implements PaperStack
     }
 
     @Override
-    public Iterator<Component> getComponentIterator() {
+    public Iterator<Component> iterator() {
         return Collections.unmodifiableList(components).iterator();
     }
 
     private void updateStateInternal() {
-        final Component current = (Component) getState().getCurrentComponent();
+        final Component current = (Component) getState().currentComponent;
         Component previous = null;
         Component next = null;
 
         if (current != null) {
             if (!components.contains(current)) {
-                throw new IllegalArgumentException("Component not in the component list");
+                throw new IllegalArgumentException(
+                        "Component not in the component list");
             }
             final Iterator<Component> iterator = getComponentIterator();
             while (iterator.hasNext()) {
@@ -96,10 +101,8 @@ public class PaperStack extends AbstractComponentContainer implements PaperStack
 
         }
         getState().setComponents(previous, current, next);
-        getState().setBackgroundColors(backgroundColors.get(previous), backgroundColors.get(current),
-                backgroundColors.get(next));
-
-        requestRepaint();
+        getState().setBackgroundColors(backgroundColors.get(previous),
+                backgroundColors.get(current), backgroundColors.get(next));
     }
 
     /**
@@ -111,15 +114,16 @@ public class PaperStack extends AbstractComponentContainer implements PaperStack
      * @param backgroundColorHex
      *            the background color of the component.
      */
-    public void addComponent(final Component component, final String backgroundColorHex) {
+    public void addComponent(final Component component,
+            final String backgroundColorHex) {
         if (components.contains(component)) {
             throw new IllegalArgumentException("Component already added");
         }
         components.add(component);
         backgroundColors.put(component, backgroundColorHex);
         super.addComponent(component);
-        if (getState().getCurrentComponent() == null) {
-            getState().setCurrentComponent(component);
+        if (getState().currentComponent == null) {
+            getState().currentComponent = component;
         }
         updateStateInternal();
 
@@ -135,14 +139,15 @@ public class PaperStack extends AbstractComponentContainer implements PaperStack
         super.removeComponent(component);
         components.remove(component);
         backgroundColors.remove(component);
-        if ((component == getState().getCurrentComponent()) && !components.isEmpty()) {
-            getState().setCurrentComponent(components.get(0));
+        if ((component == getState().currentComponent) && !components.isEmpty()) {
+            getState().currentComponent = components.get(0);
         }
         updateStateInternal();
     }
 
     @Override
-    public void replaceComponent(final Component oldComponent, final Component newComponent) {
+    public void replaceComponent(final Component oldComponent,
+            final Component newComponent) {
         final int oldLocation = components.indexOf(oldComponent);
         final int newLocation = components.indexOf(newComponent);
 
@@ -170,14 +175,16 @@ public class PaperStack extends AbstractComponentContainer implements PaperStack
      *            color of the paper edge.
      * 
      */
-    public void setPaperColor(final String paperBackColorHex, final String paperEdgeColorHex) {
-        if ((paperBackColorHex != null) && HEX_PATTERN.matcher(paperBackColorHex).matches()) {
-            getState().setPaperBackColor(paperBackColorHex);
+    public void setPaperColor(final String paperBackColorHex,
+            final String paperEdgeColorHex) {
+        if ((paperBackColorHex != null)
+                && HEX_PATTERN.matcher(paperBackColorHex).matches()) {
+            getState().paperBackColor = paperBackColorHex;
         }
-        if ((paperEdgeColorHex != null) && HEX_PATTERN.matcher(paperEdgeColorHex).matches()) {
-            getState().setPaperEdgeColor(paperEdgeColorHex);
+        if ((paperEdgeColorHex != null)
+                && HEX_PATTERN.matcher(paperEdgeColorHex).matches()) {
+            getState().paperEdgeColor = paperEdgeColorHex;
         }
-        requestRepaint();
     }
 
     /**
@@ -190,18 +197,17 @@ public class PaperStack extends AbstractComponentContainer implements PaperStack
      */
     public void setCloneElementCount(final int cloneElementCount) {
         if (cloneElementCount >= 4) {
-            getState().setCloneElementCount(cloneElementCount);
-            requestRepaint();
+            getState().cloneElementCount = cloneElementCount;
         }
     }
 
-    public void setFoldCoordinates(final int initialCanvasWidth, final int initialCanvasHeight,
-            final int initialCornerX, final int initialCornerY) {
-        getState().setInitialCanvasHeight(initialCanvasHeight);
-        getState().setInitialCanvasWidth(initialCanvasWidth);
-        getState().setInitialCornerX(initialCornerX);
-        getState().setInitialCornerY(initialCornerY);
-        requestRepaint();
+    public void setFoldCoordinates(final int initialCanvasWidth,
+            final int initialCanvasHeight, final int initialCornerX,
+            final int initialCornerY) {
+        getState().initialCanvasHeight = initialCanvasHeight;
+        getState().initialCanvasWidth = initialCanvasWidth;
+        getState().initialCornerX = initialCornerX;
+        getState().initialCornerY = initialCornerY;
     }
 
     /**
@@ -241,11 +247,12 @@ public class PaperStack extends AbstractComponentContainer implements PaperStack
     private static final Method PAGE_CHANGE_METHOD;
     static {
         try {
-            PAGE_CHANGE_METHOD = PageChangeListener.class.getDeclaredMethod("pageChange",
-                    new Class[] { PageChangeEvent.class });
+            PAGE_CHANGE_METHOD = PageChangeListener.class.getDeclaredMethod(
+                    "pageChange", new Class[] { PageChangeEvent.class });
         } catch (final java.lang.NoSuchMethodException e) {
             // This should never happen
-            throw new java.lang.RuntimeException("Internal error finding methods in PaperStack");
+            throw new java.lang.RuntimeException(
+                    "Internal error finding methods in PaperStack");
         }
     }
 
